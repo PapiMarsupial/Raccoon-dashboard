@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const API_BASE = "spy-alert-server-production.up.railway.app";
+const API_BASE = "https://spy-alert-server-production.up.railway.app";
 
 // ─── BREAKPOINTS ─────────────────────────────────────────────────────────────
 function useBreakpoint() {
