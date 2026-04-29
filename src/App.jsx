@@ -24,52 +24,38 @@ function useBreakpoint() {
 function useQuotes(symbols) {
   const [quotes, setQuotes] = useState({});
   const fetch_ = useCallback(async () => {
-    const results = {};
-    await Promise.allSettled(symbols.map(async sym => {
-      try {
-        const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`);
-        const d = await r.json();
-        const meta = d?.chart?.result?.[0]?.meta;
-        if (!meta) return;
-        const prev = meta.chartPreviousClose || meta.previousClose;
-        const curr = meta.regularMarketPrice;
-        results[sym] = {
-          price: curr?.toFixed(2), prev,
-          change: curr && prev ? (curr - prev).toFixed(2) : null,
-          changePct: curr && prev ? (((curr - prev) / prev) * 100).toFixed(2) : null,
-          high: meta.regularMarketDayHigh?.toFixed(2),
-          low: meta.regularMarketDayLow?.toFixed(2),
-          open: meta.regularMarketOpen?.toFixed(2),
-          volume: meta.regularMarketVolume,
-        };
-      } catch {}
-    }));
-    setQuotes(results);
+    try {
+      const r = await fetch(`${API_BASE}/quotes?symbols=${symbols.join(",")}`);
+      const d = await r.json();
+      setQuotes(d);
+    } catch {}
   }, [symbols.join(",")]);
-  useEffect(() => { fetch_(); const iv = setInterval(fetch_, 30000); return () => clearInterval(iv); }, [fetch_]);
+  useEffect(() => {
+    fetch_();
+    const iv = setInterval(fetch_, 30000);
+    return () => clearInterval(iv);
+  }, [fetch_]);
   return { quotes };
 }
+
 
 function useCandles(symbol = "SPY") {
   const [candles, setCandles] = useState([]);
   const fetch_ = useCallback(async () => {
     try {
-      const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=5m&range=1d`);
+      const r = await fetch(`${API_BASE}/candles?symbol=${symbol}`);
       const d = await r.json();
-      const res = d?.chart?.result?.[0];
-      if (!res) return;
-      const ts = res.timestamps || res.timestamp;
-      const q = res.indicators?.quote?.[0];
-      if (!ts || !q) return;
-      setCandles(ts.map((t, i) => ({
-        t: new Date(t * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
-        o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i],
-      })).filter(c => c.o && c.h && c.l && c.c));
+      setCandles(d);
     } catch {}
   }, [symbol]);
-  useEffect(() => { fetch_(); const iv = setInterval(fetch_, 60000); return () => clearInterval(iv); }, [fetch_]);
+  useEffect(() => {
+    fetch_();
+    const iv = setInterval(fetch_, 60000);
+    return () => clearInterval(iv);
+  }, [fetch_]);
   return candles;
 }
+
 
 function useApiAlerts() {
   const [data, setData] = useState({ spy_alerts: [], screener_alerts: [], count: {} });
