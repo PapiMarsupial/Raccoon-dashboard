@@ -284,12 +284,10 @@ function PremarketBrief({ quotes }) {
     const spy = quotes["SPY"], qqq = quotes["QQQ"], vix = quotes["^VIX"];
     const ctx = `SPY: $${spy?.price} (${spy?.changePct}%) H:${spy?.high} L:${spy?.low}\nQQQ: $${qqq?.price} (${qqq?.changePct}%)\nVIX: ${vix?.price} (${vix?.changePct}%)\nEarnings: AAPL AMC, AMZN AMC\nEcon: Jobless Claims 8:30, ISM PMI 10:00`;
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: "You are a sharp pre-market brief writer for a SPY 0DTE options scalper. Punchy, Bloomberg-style. Bullet points.\nFormat:\n🌅 OVERNIGHT SNAPSHOT (2-3 bullets)\n📊 KEY LEVELS TO WATCH (3-4 price levels)\n⚡ CATALYST WATCH (earnings + econ)\n🎯 BIAS (bull/bear/neutral + 1-sentence rationale)\nMax 200 words.", messages: [{ role: "user", content: `Generate today's pre-market brief.\n${ctx}` }] })
-      });
+      const resp = await fetch(`${API_BASE}/brief`);
       const d = await resp.json();
-      setBrief(d?.content?.[0]?.text || "Error generating brief.");
+      setBrief(d?.brief || d?.error || "Error generating brief.");
+
     } catch { setBrief("API error — check console."); }
     setLoading(false); setGenerated(true);
   };
