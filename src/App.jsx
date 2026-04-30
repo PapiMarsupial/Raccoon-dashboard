@@ -413,8 +413,8 @@ export default function RaccoonOptions() {
 
         {/* Ticker strip — fewer tickers on phone */}
         <div style={{ display: "flex", gap: isPhone ? 14 : 20, alignItems: "center" }}>
-          [{ sym: "SPY", q: spy }, { sym: "QQQ", q: qqq }, { sym: "VIX", q: vix }]
-.map(({ sym, q }) => (
+  {[{ sym: "SPY", q: spy }, { sym: "QQQ", q: qqq }, { sym: "VIX", q: vix }].map(({ sym, q }) => (
+
             <div key={sym} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 7, color: "rgba(255,255,255,0.26)", letterSpacing: "0.12em" }}>{sym}</div>
               <div style={{ fontSize: isPhone ? 12 : 13, fontWeight: 700, color: "#fff" }}>{q?.price || "—"}</div>
