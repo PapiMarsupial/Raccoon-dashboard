@@ -411,9 +411,10 @@ export default function RaccoonOptions() {
           {isPhone && <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", letterSpacing: "0.06em" }}>RACCOON OPTIONS</div>}
         </div>
 
-        {/* Ticker strip — fewer tickers on phone */}
-        <div style={{ display: "flex", gap: isPhone ? 14 : 20, alignItems: "center" }}>
-  {[{ sym: "SPY", q: spy }, { sym: "QQQ", q: qqq }, { sym: "VIX", q: vix }].map(({ sym, q }) => (
+                 {/* Ticker strip */}
+          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+            {[{ sym: "SPY", q: spy }, { sym: "QQQ", q: qqq }, { sym: "VIX", q: vix }].map(({ sym, q }) => (
+
 
             <div key={sym} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 7, color: "rgba(255,255,255,0.26)", letterSpacing: "0.12em" }}>{sym}</div>
