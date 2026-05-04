@@ -86,6 +86,27 @@ function useNews() {
   return { news, loading };
 }
 
+function useMovers() {
+  const [movers, setMovers] = useState([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/movers`);
+        setMovers(await r.json());
+      } catch {}
+    })();
+    const iv = setInterval(async () => {
+      try {
+        const r = await fetch(`${API_BASE}/movers`);
+        setMovers(await r.json());
+      } catch {}
+    }, 60000);
+    return () => clearInterval(iv);
+  }, []);
+  return movers;
+}
+
+
 const MOCK_NEWS = [
   { title: "Fed officials signal patience on rate cuts amid inflation uncertainty", date: new Date().toISOString(), source: "Reuters" },
   { title: "NVIDIA surges on strong data center demand ahead of earnings", date: new Date().toISOString(), source: "Bloomberg" },
@@ -337,6 +358,50 @@ function LiveDot({ active }) {
 }
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
+function TickerCarousel({ movers, screenAlerts }) {
+  const items = [
+    ...screenAlerts.map(a => ({
+      ticker: a.ticker,
+      price: a.price ? `$${parseFloat(a.price).toFixed(2)}` : "—",
+      changePct: a.change_pct,
+      tag: "🦝",
+    })),
+    ...movers.map(m => ({
+      ticker: m.ticker,
+      price: `$${m.price}`,
+      changePct: m.changePct,
+      volRatio: m.volRatio,
+      tag: null,
+    })),
+  ].filter((v, i, a) => a.findIndex(x => x.ticker === v.ticker) === i);
+
+  if (!items.length) return null;
+
+  const doubled = [...items, ...items];
+
+  return (
+    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(13,17,23,0.95)", overflow: "hidden", position: "relative", height: 36 }}>
+      <div style={{ display: "flex", alignItems: "center", height: "100%", animation: "scroll 60s linear infinite", width: "max-content" }}>
+        {doubled.map((item, i) => {
+          const up = item.changePct >= 0;
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 20px", borderRight: "1px solid rgba(255,255,255,0.05)", whiteSpace: "nowrap" }}>
+              {item.tag && <span style={{ fontSize: 10 }}>{item.tag}</span>}
+              <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.85)", fontFamily: "'Fira Code', monospace" }}>{item.ticker}</span>
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", fontFamily: "'Fira Code', monospace" }}>{item.price}</span>
+              <span style={{ fontSize: 11, color: up ? "#34d399" : "#f87171", fontFamily: "'Fira Code', monospace" }}>{up ? "+" : ""}{item.changePct?.toFixed(2)}%</span>
+              {item.volRatio && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)" }}>{item.volRatio}x vol</span>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 40, background: "linear-gradient(90deg, rgba(13,17,23,1), transparent)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 40, background: "linear-gradient(270deg, rgba(13,17,23,1), transparent)", pointerEvents: "none" }} />
+    </div>
+  );
+}
+
+
 export default function RaccoonOptions() {
   const bp = useBreakpoint();
   const isPhone = bp === "phone", isTablet = bp === "tablet";
